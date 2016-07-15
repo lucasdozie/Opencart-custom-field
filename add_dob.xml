@@ -1,0 +1,536 @@
+<modification>
+    <id>add date of birth field into checkout version 1.5.4</id>
+      <version>1.0</version>
+		   <vqmver>2.1.6</vqmver>
+       <author>www.dozie.com</author>		
+
+<file name="catalog/view/theme/default/*/checkout/checkout.tpl">
+  <operation>
+    <search position="before" index="1"><![CDATA[
+    <?php echo $footer; ?>
+    ]]></search>
+    <add><![CDATA[
+    <script type="text/javascript" src="catalog/view/javascript/jquery/ui/ui.datepicker.js"></script>
+    <script type="text/javascript"><!-- $(document).ready(function() { $('#payment_address_dob').datepicker({changeMonth: true, changeYear: true, yearRange: '-80:+0', dateFormat: 'dd-mm'}); }); //--></script>
+    ]]></add>
+  </operation>
+</file>
+<file name="admin/model/sale/order.php">  
+  <operation>
+      <search position="iafter"><![CDATA['email'                   => $order_query->row['email'],]]></search>
+      <add><![CDATA[
+        'dob'                   => $order_query->row['dob'],
+   ]]></add>
+  </operation>
+</file>
+<file name="admin/model/sale/customer.php">
+    <!--<operation>
+      <search position="after"><![CDATA[class ModelSaleCustomer extends Model {]]></search>
+      <add><![CDATA[
+      //Check and add dob column to customer table
+      $query = $this->db->query("DESCRIBE ".DB_PREFIX."customer dob");
+      if (!$query->num_rows) {
+      $this->db->query("ALTER TABLE " . DB_PREFIX . "customer ADD dob DATE NULL AFTER email");
+      }
+      ]]></add>
+  </operation>-->
+    <operation>
+      <search position="iafter"><![CDATA[email = '" . $this->db->escape($data['email']) . "',]]></search>
+      <add><![CDATA[
+        dob = '" . $this->db->escape($data['dob']) . "', 
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[
+        if (!empty($data['filter_email'])) {
+        ]]></search>
+      <add><![CDATA[
+          if (!empty($data['filter_dob'])) {
+            $implode[] = "dob LIKE '" . $this->db->escape($data['filter_dob']) . "%'";
+          }
+   ]]></add>
+  </operation>
+</file> 
+<!--Controller files-->
+<file name="admin/controller/sale/order.php">
+  <!--<operation>
+      <search position="after"><![CDATA[public function index() {]]></search>
+      <add><![CDATA[
+      //Check and add dob column to customer table
+      $query = $this->db->query("DESCRIBE ".DB_PREFIX."order dob");
+      if (!$query->num_rows) {
+      $this->db->query("ALTER TABLE " . DB_PREFIX . "order ADD dob DATE NULL AFTER email");
+      }
+      ]]></add>
+  </operation>-->
+  <operation>
+      <search position="after"><![CDATA[$this->data['entry_email'] = $this->language->get('entry_email');]]></search>
+      <add><![CDATA[
+        $this->data['entry_dob'] = $this->language->get('entry_dob');
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[$this->data['email'] = $order_info['email'];]]></search>
+      <add><![CDATA[
+        $this->data['dob'] = $order_info['dob'];
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[$this->data['email'] = '';]]></search>
+      <add><![CDATA[
+        $this->data['dob'] = '';
+   ]]></add>
+  </operation><operation>
+      <search position="after"><![CDATA[$this->data['text_email'] = $this->language->get('text_email');]]></search>
+      <add><![CDATA[
+        $this->data['text_dob'] = $this->language->get('text_dob');
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[$store_email = $store_info['config_email'];]]></search>
+      <add><![CDATA[
+        $store_dob = $store_info['config_dob'];
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA['store_email'        => $store_email,]]></search>
+      <add><![CDATA[
+        'store_dob'        => $store_dob,
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA['email'              => $order_info['email'],]]></search>
+      <add><![CDATA[
+        'dob'              => $order_info['dob'],
+   ]]></add>
+  </operation>
+</file>
+
+
+<file name="admin/controller/sale/customer.php">
+  <!--please check library the edit some syntax-->
+  <operation>
+      <search position="after"><![CDATA[public function index() {]]></search>
+      <add><![CDATA[
+      //Check and add dob column to customer table
+      $query = $this->db->query("DESCRIBE ".DB_PREFIX."customer dob");
+      if (!$query->num_rows) {
+      $this->db->query("ALTER TABLE " . DB_PREFIX . "customer ADD dob DATE NULL AFTER email");
+      }
+      ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[
+        if (isset($this->request->get['filter_email']))
+        ]]></search>
+      <add><![CDATA[
+        if (isset($this->request->get['filter_dob'])) {
+        $url .= '&filter_dob=' . $this->request->get['filter_dob'];
+      }
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[
+        if (isset($this->request->post['fax'])) {
+        ]]></search>
+      <add><![CDATA[
+        if (isset($this->request->post['dob'])) {
+          $this->data['dob'] = $this->request->post['dob'];
+        } elseif (!empty($customer_info)) {
+          $this->data['dob'] = $customer_info['dob'];
+        } else {
+          $this->data['dob'] = '';
+        }
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[
+        'email'             => $result['email'],
+        ]]></search>
+      <add><![CDATA[
+       'dob'             => $result['dob'],
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[
+        'filter_email'             => $filter_email,
+        ]]></search>
+      <add><![CDATA[
+       'filter_dob'             => $filter_dob,
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[
+        $this->data['column_email'] = $this->language->get('column_email');
+        ]]></search>
+      <add><![CDATA[
+        $this->data['column_dob'] = $this->language->get('column_dob');
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[
+        $this->data['entry_email'] = $this->language->get('entry_email');
+        ]]></search>
+      <add><![CDATA[
+        $this->data['entry_dob'] = $this->language->get('entry_dob');
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[
+        if (isset($this->error['telephone'])) {
+        ]]></search>
+      <add><![CDATA[
+        if (isset($this->error['dob'])) {
+          $this->data['error_dob'] = $this->error['dob'];
+        } else {
+          $this->data['error_dob'] = '';
+        }
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[
+        'email'          => $result['email'],
+        ]]></search>
+      <add><![CDATA[
+        'dob'          => $result['dob'],
+   ]]></add>
+  </operation>
+</file>
+
+
+<!--Language files -->
+<file name="admin/language/english/sale/order.php">
+  <!--please check library the edit some syntax-->
+  <operation>
+      <search position="after"><![CDATA[
+        $_['text_email']
+        ]]></search>
+      <add><![CDATA[
+        $_['text_dob']                   = 'Date of Birth';
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[
+        $_['entry_email']
+        ]]></search>
+      <add><![CDATA[
+        $_['entry_dob']                  = 'Date of Birth';
+   ]]></add>
+  </operation>
+</file>
+<file name="admin/language/english/sale/customer.php">
+  <operation>
+      <search position="before"><![CDATA[
+        $_['column_email']
+        ]]></search>
+      <add><![CDATA[
+        $_['column_dob']            = 'Date of Birth';
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[
+        $_['entry_email']
+        ]]></search>
+      <add><![CDATA[
+        $_['entry_dob']             = 'Date of Birth';
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[
+        $_['error_email']
+        ]]></search>
+      <add><![CDATA[
+        $_['error_dob']             = 'Date of Birth does not appear to be valid!';
+   ]]></add>
+  </operation>
+</file>
+
+<!--View files-->
+<file name="admin/view/template/sale/order_info.tpl">
+  <operation>
+      <search position="before"><![CDATA[<td><?php echo $text_telephone; ?></td>]]></search>
+      <add><![CDATA[
+           <td><?php echo $text_dob; ?></td>
+            <td><?php echo $dob; ?></td>
+          </tr>
+          <tr>
+   ]]></add>
+  </operation>
+</file>
+
+<file name="admin/view/template/sale/order_form.tpl">
+   <operation>
+      <search position="before"><![CDATA[<td><span class="required">*</span> <?php echo $entry_telephone; ?></td>]]></search>
+      <add><![CDATA[
+        <td><span class="required">*</span> <?php echo $entry_dob; ?></td>
+              <td><input type="text" name="dob"  class="datetime" value="<?php echo $dob; ?>" />
+                <?php if ($error_dob) { ?>
+                <span class="error"><?php echo $error_dob; ?></span>
+                <?php } ?></td>
+            </tr>
+            <tr>
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[telephone: item['telephone'],]]></search>
+      <add><![CDATA[
+        dob: item['dob'],
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[$('input[name=\'telephone\']').attr('value', ui.item['telephone']);]]></search>
+      <add><![CDATA[
+        $('input[name=\'dob\']').attr('value', ui.item['dob']);
+   ]]></add>
+  </operation>
+</file>
+
+<file name="admin/view/template/sale/customer_form.tpl">
+  <operation>
+      <search position="before"><![CDATA[<td><span class="required">*</span> <?php echo $entry_telephone; ?></td>]]></search>
+      <add><![CDATA[
+          <td><span class="required">*</span> <?php echo $entry_dob; ?></td>
+                <td><input type="text" name="dob" class="dob_datepicker" value="<?php echo $dob; ?>" />
+                  <?php if ($error_dob) { ?>
+                  <span class="error"><?php echo $error_dob; ?></span>
+                  <?php  } ?></td>
+              </tr>
+          <tr>
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[<?php echo $footer; ?>]]></search>
+      <add><![CDATA[
+          <script type="text/javascript" src="view/javascript/jquery/ui/jquery-ui-timepicker-addon.js"></script> 
+            <script type="text/javascript"><!--
+            $('.dob_datepicker').datepicker({dateFormat: 'dd-mm'});
+          </script>
+   ]]></add>
+  </operation>
+</file>
+
+
+
+<!--Frontend view section-->
+  <!--model-->
+<file name="catalog/model/checkout/order.php">
+    <operation>
+      <search position="iafter"><![CDATA[email = '" . $this->db->escape($data['email']) . "',]]></search>
+      <add><![CDATA[
+        dob = '" . $this->db->escape($this->data['dob']) . "', 
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA['email'                   => $order_query->row['email'],]]></search>
+      <add><![CDATA[
+        'dob'                   => $order_query->row['dob'], 
+   ]]></add>
+  </operation>
+</file>
+<file name="catalog/model/account/customer.php">
+  <operation>
+      <search position="iafter"><![CDATA[email = '" . $this->db->escape($data['email']) . "',]]></search>
+      <add><![CDATA[
+        dob = '" . $this->db->escape($this->data['dob']) . "', 
+   ]]></add>
+  </operation>
+</file>
+<file name="catalog/model/account/order.php">
+  <operation>
+      <search position="iafter"><![CDATA['email'                   => $order_query->row['email'],]]></search>
+      <add><![CDATA[
+        'dob'                   => $order_query->row['dob'], 
+   ]]></add>
+  </operation>
+</file>
+
+
+<!--controller -->
+<file name="catalog/controller/checkout/register.php">
+    <operation>
+      <search position="after"><![CDATA[$this->data['entry_email'] = $this->language->get('entry_email');]]></search>
+      <add><![CDATA[
+        $this->data['entry_dob'] = $this->language->get('entry_dob'); 
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[if ((utf8_strlen($this->request->post['telephone']) < 3) || (utf8_strlen($this->request->post['telephone']) > 32)) {]]></search>
+      <add><![CDATA[
+        if ((utf8_strlen($this->request->post['dob']) < 3) || (utf8_strlen($this->request->post['dob']) > 32)) {
+        $json['error']['dob'] = $this->language->get('error_dob');
+      }
+   ]]></add>
+  </operation>
+</file>
+<file name="catalog/controller/checkout/guest.php">
+    <operation>
+      <search position="after"><![CDATA[$this->data['entry_email'] = $this->language->get('entry_email');]]></search>
+      <add><![CDATA[
+        $this->data['entry_dob'] = $this->language->get('entry_dob'); 
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[if (isset($this->session->data['guest']['telephone']))]]></search>
+      <add><![CDATA[
+        if (isset($this->session->data['guest']['dob'])) {
+      $this->data['dob'] = $this->session->data['guest']['dob'];
+    } else {
+      $this->data['dob'] = '';
+    } 
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[$this->session->data['guest']['email'] = $this->request->post['email'];]]></search>
+      <add><![CDATA[
+        $this->session->data['guest']['dob'] = $this->request->post['dob']; 
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[if ((utf8_strlen($this->request->post['telephone']) < 3) || (utf8_strlen($this->request->post['telephone']) > 32))]]></search>
+      <add><![CDATA[
+        if ((utf8_strlen(trim($this->request->post['dob'])) < 1) || (utf8_strlen(trim($this->request->post['dob'])) > 32)) {
+        $json['error']['dob'] = $this->language->get('error_dob');
+      }
+   ]]></add>
+  </operation>
+</file>
+<file name="catalog/controller/account/register.php">
+    <operation>
+      <search position="after"><![CDATA[$this->data['entry_email'] = $this->language->get('entry_email');]]></search>
+      <add><![CDATA[
+        $this->data['entry_dob'] = $this->language->get('entry_dob'); 
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[if (isset($this->error['telephone'])) {]]></search>
+      <add><![CDATA[
+        if (isset($this->error['dob'])) {
+      $this->data['error_dob'] = $this->error['dob'];
+    } else {
+      $this->data['error_dob'] = '';
+    }
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[if (isset($this->request->post['telephone'])) {]]></search>
+      <add><![CDATA[
+        if (isset($this->request->post['dob'])) {
+          $this->data['dob'] = $this->request->post['dob'];
+        } else {
+          $this->data['dob'] = '';
+        }
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[if ((utf8_strlen($this->request->post['telephone']) < 3) || (utf8_strlen($this->request->post['telephone']) > 32))]]></search>
+      <add><![CDATA[
+        if ((utf8_strlen($this->request->post['dob']) < 1) || (utf8_strlen($this->request->post['dob']) > 32)) {
+        $json['error']['dob'] = $this->language->get('error_dob');
+      }
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="before"><![CDATA[$this->data['entry_telephone'] = $this->language->get('entry_telephone');]]></search>
+      <add><![CDATA[
+        $this->data['entry_dob'] = $this->language->get('entry_dob');
+   ]]></add>
+  </operation>
+</file>
+
+<!--Language -->
+<file name="catalog/language/english/checkout/checkout.php">
+    <operation>
+      <search position="after"><![CDATA[$_['entry_email']]]></search>
+      <add><![CDATA[
+        $_['entry_dob']                    = 'Date of Birth'; 
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[$_['error_email']]]></search>
+      <add><![CDATA[
+        $_['error_dob']                    = 'Date of Birth does not appear to be valid!'; 
+   ]]></add>
+  </operation>
+</file>
+<file name="catalog/language/english/account/register.php">
+    <operation>
+      <search position="after"><![CDATA[$_['entry_email']]]></search>
+      <add><![CDATA[
+        $_['entry_dob']          = 'Date of Birth'; 
+   ]]></add>
+  </operation>
+  <operation>
+      <search position="after"><![CDATA[$_['error_email']]]></search>
+      <add><![CDATA[
+        $_['error_dob']          = 'Date of Birth does not appear to be valid!';
+   ]]></add>
+  </operation>
+</file>
+
+<!--View -->
+<file name="catalog/view/theme/default/template/checkout/guest.tpl">
+    <operation>
+      <search position="before"><![CDATA[
+      <span class="required">*</span> <?php echo $entry_telephone; ?>
+        ]]></search>
+      <add><![CDATA[
+        <span class="required">*</span> <?php echo $entry_dob; ?><br />
+        <input type="text" name="dob" id="dob_datepick" class="dob_datepicker" value="<?php echo $dob; ?>" class="large-field" />
+        <br />
+        <br />
+   ]]></add>
+  </operation>
+</file>
+<file name="catalog/view/theme/default/template/checkout/checkout.tpl">
+    <operation>
+      <search position="before"><![CDATA[<?php echo $footer; ?>]]></search>
+      <add><![CDATA[
+          <script type="text/javascript" src="view/javascript/jquery/ui/jquery-ui-timepicker-addon.js"></script> 
+            <script type="text/javascript"><!--
+            $('.dob_datepicker').datepicker({dateFormat: 'dd-mm'});
+          </script>
+   ]]></add>
+  </operation>
+</file>
+<file name="catalog/view/theme/default/template/checkout/register.tpl">
+  <operation>
+      <search position="before"><![CDATA[
+      <span class="required">*</span> <?php echo $entry_telephone; ?>
+        ]]></search>
+      <add><![CDATA[
+        <span class="required">*</span> <?php echo $entry_dob; ?><br />
+        <input type="text" name="dob" class="dob_datepicker" value="" class="large-field" />
+        <br />
+        <br />
+   ]]></add>
+  </operation>
+</file>
+<file name="catalog/view/theme/default/template/account/register.tpl">
+  <operation>
+      <search position="before"><![CDATA[<td><span class="required">*</span> <?php echo $entry_telephone; ?></td>]]></search>
+      <add><![CDATA[
+        <tr>
+          <td><span class="required">*</span> <?php echo $entry_dob; ?></td>
+          <td><input type="text" name="dob" class="dob_datepicker" value="<?php echo $dob; ?>" />
+            <?php if ($error_dob) { ?>
+            <span class="error"><?php echo $error_dob; ?></span>
+            <?php } ?></td>
+        </tr>
+        <tr>
+   ]]></add>
+  </operation>
+  <operation>
+        <search position="before" index="1"><![CDATA[
+        <?php echo $footer; ?>
+        ]]></search>
+        <add><![CDATA[
+            <script type="text/javascript" src="catalog/view/javascript/jquery/ui/ui.datepicker.js"></script>
+            <script type="text/javascript"><!--
+            $(document).ready(function() {
+                $('.dob_datepicker').datepicker({changeMonth: true, changeYear: true, yearRange: '-80:+0', dateFormat: 'dd-mm'});
+            });
+            //--></script>
+        ]]></add>
+    </operation>
+</file>
+</modification>
